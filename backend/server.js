@@ -107,3 +107,4 @@ if (require.main === module) {
 }
 
 module.exports = app;
+// trust proxy for Render load balancer
