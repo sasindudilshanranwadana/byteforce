@@ -111,3 +111,4 @@ function ShareItem({ href, icon, label }) {
     </a>
   );
 }
+// ShareCampaignButton — Web Share API + Twitter/Facebook/clipboard fallback
