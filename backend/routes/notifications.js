@@ -66,3 +66,4 @@ router.get('/pending-count', async (req, res, next) => {
 });
 
 module.exports = router;
+// notifications.js — drain route for queued email notifications
