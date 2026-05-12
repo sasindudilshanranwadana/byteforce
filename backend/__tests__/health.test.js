@@ -18,3 +18,4 @@ describe('GET /nonexistent-route', () => {
     expect(res.body.error).toBe('Route not found');
   });
 });
+// backend unit tests — health endpoint and payments API
