@@ -51,3 +51,4 @@ jobs:
         run: npm run build
 # CI pipeline — Byteforce
 # secrets wired
+# node 20 + npm install
