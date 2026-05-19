@@ -1,54 +1,33 @@
 -- ============================================================
--- Byteforce — Dummy / Seed Data for Testing
+-- Byteforce — Seed Data for Testing
 -- ============================================================
--- Run this in Supabase SQL Editor (Dashboard → SQL Editor).
---
--- IMPORTANT: This script inserts profiles directly into
--- public.profiles using fixed UUIDs. It does NOT create
--- auth.users entries — you must sign up those email addresses
--- via the app (or Supabase Auth dashboard) first, and the
--- trigger will create matching profile rows.
---
--- Alternatively, use the "UPSERT profiles" approach below,
--- which inserts/updates profiles without needing auth.users.
---
--- Credentials for test accounts (create via Supabase Auth):
+-- Run this in Supabase SQL Editor AFTER creating all 6 auth users:
 --   admin@byteforce.test        / Byteforce123!
 --   campaigner1@byteforce.test  / Byteforce123!
 --   campaigner2@byteforce.test  / Byteforce123!
 --   backer1@byteforce.test      / Byteforce123!
 --   backer2@byteforce.test      / Byteforce123!
 --   backer3@byteforce.test      / Byteforce123!
+--
+-- This script looks up the real UUIDs from auth.users by email,
+-- so it works regardless of what Supabase assigned.
 -- ============================================================
 
--- ─── Step 1: Upsert test profiles ────────────────────────────────────────────
--- After creating auth users above, their UUIDs will differ.
--- Run this query to get real UUIDs:
---   select id, email from auth.users where email like '%byteforce.test%';
--- Then replace the placeholder UUIDs below.
---
--- For now we use fixed UUIDs as placeholders — replace them
--- with real auth.users IDs before running if auth users exist.
-
--- Fixed UUIDs for seed data
--- (replace with real IDs from auth.users after signup)
 do $$
 declare
-  admin_id       uuid := '00000000-0000-0000-0000-000000000001';
-  campaigner1_id uuid := '00000000-0000-0000-0000-000000000002';
-  campaigner2_id uuid := '00000000-0000-0000-0000-000000000003';
-  backer1_id     uuid := '00000000-0000-0000-0000-000000000004';
-  backer2_id     uuid := '00000000-0000-0000-0000-000000000005';
-  backer3_id     uuid := '00000000-0000-0000-0000-000000000006';
+  admin_id       uuid;
+  campaigner1_id uuid;
+  campaigner2_id uuid;
+  backer1_id     uuid;
+  backer2_id     uuid;
+  backer3_id     uuid;
 
-  -- Campaign IDs
   camp1_id uuid := uuid_generate_v4();
   camp2_id uuid := uuid_generate_v4();
   camp3_id uuid := uuid_generate_v4();
   camp4_id uuid := uuid_generate_v4();
   camp5_id uuid := uuid_generate_v4();
 
-  -- Reward tier IDs
   tier1a_id uuid := uuid_generate_v4();
   tier1b_id uuid := uuid_generate_v4();
   tier1c_id uuid := uuid_generate_v4();
@@ -60,22 +39,49 @@ declare
 
 begin
 
--- ─── Profiles ────────────────────────────────────────────────────────────────
+-- ─── Look up real UUIDs from auth.users ──────────────────────────────────────
+select id into admin_id       from auth.users where email = 'admin@byteforce.test'        limit 1;
+select id into campaigner1_id from auth.users where email = 'campaigner1@byteforce.test'  limit 1;
+select id into campaigner2_id from auth.users where email = 'campaigner2@byteforce.test'  limit 1;
+select id into backer1_id     from auth.users where email = 'backer1@byteforce.test'      limit 1;
+select id into backer2_id     from auth.users where email = 'backer2@byteforce.test'      limit 1;
+select id into backer3_id     from auth.users where email = 'backer3@byteforce.test'      limit 1;
+
+-- Abort with a clear message if any user is missing
+if admin_id is null then
+  raise exception 'User admin@byteforce.test not found in auth.users — create it in Supabase Auth first';
+end if;
+if campaigner1_id is null then
+  raise exception 'User campaigner1@byteforce.test not found in auth.users — create it in Supabase Auth first';
+end if;
+if campaigner2_id is null then
+  raise exception 'User campaigner2@byteforce.test not found in auth.users — create it in Supabase Auth first';
+end if;
+if backer1_id is null then
+  raise exception 'User backer1@byteforce.test not found in auth.users — create it in Supabase Auth first';
+end if;
+if backer2_id is null then
+  raise exception 'User backer2@byteforce.test not found in auth.users — create it in Supabase Auth first';
+end if;
+if backer3_id is null then
+  raise exception 'User backer3@byteforce.test not found in auth.users — create it in Supabase Auth first';
+end if;
+
+-- ─── Upsert profiles ─────────────────────────────────────────────────────────
 insert into public.profiles (id, name, role, avatar_url) values
-  (admin_id,       'Alex Admin',       'admin',      'https://api.dicebear.com/7.x/avataaars/svg?seed=AlexAdmin'),
-  (campaigner1_id, 'Priya Sharma',     'campaigner', 'https://api.dicebear.com/7.x/avataaars/svg?seed=PriyaSharma'),
-  (campaigner2_id, 'Jordan Lee',       'campaigner', 'https://api.dicebear.com/7.x/avataaars/svg?seed=JordanLee'),
-  (backer1_id,     'Marcus Johnson',   'backer',     'https://api.dicebear.com/7.x/avataaars/svg?seed=MarcusJohnson'),
-  (backer2_id,     'Sofia Nguyen',     'backer',     'https://api.dicebear.com/7.x/avataaars/svg?seed=SofiaNguyen'),
-  (backer3_id,     'Liam Chen',        'backer',     'https://api.dicebear.com/7.x/avataaars/svg?seed=LiamChen')
+  (admin_id,       'Alex Admin',     'admin',      'https://api.dicebear.com/7.x/avataaars/svg?seed=AlexAdmin'),
+  (campaigner1_id, 'Priya Sharma',   'campaigner', 'https://api.dicebear.com/7.x/avataaars/svg?seed=PriyaSharma'),
+  (campaigner2_id, 'Jordan Lee',     'campaigner', 'https://api.dicebear.com/7.x/avataaars/svg?seed=JordanLee'),
+  (backer1_id,     'Marcus Johnson', 'backer',     'https://api.dicebear.com/7.x/avataaars/svg?seed=MarcusJohnson'),
+  (backer2_id,     'Sofia Nguyen',   'backer',     'https://api.dicebear.com/7.x/avataaars/svg?seed=SofiaNguyen'),
+  (backer3_id,     'Liam Chen',      'backer',     'https://api.dicebear.com/7.x/avataaars/svg?seed=LiamChen')
 on conflict (id) do update set
-  name = excluded.name,
-  role = excluded.role,
+  name       = excluded.name,
+  role       = excluded.role,
   avatar_url = excluded.avatar_url;
 
 -- ─── Campaigns ───────────────────────────────────────────────────────────────
 
--- Campaign 1: Active, 68% funded (technology)
 insert into public.campaigns
   (id, creator_id, title, description, category, goal_amount, raised_amount, image_url, deadline, status)
 values (
@@ -87,7 +93,6 @@ values (
   now() + interval '18 days', 'active'
 );
 
--- Campaign 2: Active, fully funded → closed/completed
 insert into public.campaigns
   (id, creator_id, title, description, category, goal_amount, raised_amount, image_url, deadline, status)
 values (
@@ -99,7 +104,6 @@ values (
   now() + interval '5 days', 'closed'
 );
 
--- Campaign 3: Active, 22% funded (education)
 insert into public.campaigns
   (id, creator_id, title, description, category, goal_amount, raised_amount, image_url, deadline, status)
 values (
@@ -111,7 +115,6 @@ values (
   now() + interval '30 days', 'active'
 );
 
--- Campaign 4: Active, 89% funded (health)
 insert into public.campaigns
   (id, creator_id, title, description, category, goal_amount, raised_amount, image_url, deadline, status)
 values (
@@ -123,7 +126,6 @@ values (
   now() + interval '8 days', 'active'
 );
 
--- Campaign 5: Pending admin approval (environment)
 insert into public.campaigns
   (id, creator_id, title, description, category, goal_amount, raised_amount, image_url, deadline, status)
 values (
@@ -135,36 +137,30 @@ values (
   now() + interval '45 days', 'pending'
 );
 
--- ─── Reward Tiers ────────────────────────────────────────────────────────────
+-- ─── Reward Tiers ─────────────────────────────────────────────────────────────
 
--- Campaign 1 tiers
 insert into public.reward_tiers (id, campaign_id, title, minimum_amount, description) values
   (tier1a_id, camp1_id, 'Supporter',    25.00,  'Your name listed in the app credits + early access to the beta.'),
   (tier1b_id, camp1_id, 'Green Pioneer',75.00,  'Everything in Supporter + exclusive EcoTrack tote bag + 1-year premium subscription.'),
   (tier1c_id, camp1_id, 'Climate Hero', 200.00, 'Everything in Green Pioneer + 1:1 onboarding call with the founders + your logo on the splash screen.');
 
--- Campaign 2 tiers
 insert into public.reward_tiers (id, campaign_id, title, minimum_amount, description) values
   (tier2a_id, camp2_id, 'Music Friend',   50.00, 'Sponsor one month of lessons for a student. Receive a thank-you card drawn by the student.'),
   (tier2b_id, camp2_id, 'Instrument Hero',150.00,'Sponsor a full semester including instrument hire. Named plaque on the instrument + concert invitation.');
 
--- Campaign 3 tier
 insert into public.reward_tiers (id, campaign_id, title, minimum_amount, description) values
   (tier3a_id, camp3_id, 'Digital Ally', 50.00, 'Sponsor a student data voucher for 10 weeks + shout-out in our graduation ceremony program.');
 
--- Campaign 4 tiers
 insert into public.reward_tiers (id, campaign_id, title, minimum_amount, description) values
-  (tier4a_id, camp4_id, 'Wellbeing Supporter', 30.00,  'Your name in the app thank-you page + early access to MindBridge when it launches.'),
+  (tier4a_id, camp4_id, 'Wellbeing Supporter',    30.00,  'Your name in the app thank-you page + early access to MindBridge when it launches.'),
   (tier4b_id, camp4_id, 'Mental Health Champion', 100.00, 'Everything in Wellbeing Supporter + certificate of appreciation + invitation to our pilot launch event.');
 
--- ─── Donations (simulated completed payments) ─────────────────────────────────
--- NOTE: Do NOT rely on these to update raised_amount — we set raised_amount
--- directly on campaigns above. These rows exist for the donation history UI.
+-- ─── Donations ───────────────────────────────────────────────────────────────
 
 insert into public.donations
   (backer_id, campaign_id, reward_tier_id, amount, status, stripe_payment_intent_id, created_at)
 values
-  -- Campaign 1 donations (sum = 3400)
+  -- Campaign 1 (raised: 3400)
   (backer1_id, camp1_id, tier1b_id, 75.00,  'completed', 'pi_test_001', now() - interval '14 days'),
   (backer2_id, camp1_id, tier1a_id, 25.00,  'completed', 'pi_test_002', now() - interval '12 days'),
   (backer3_id, camp1_id, tier1c_id, 200.00, 'completed', 'pi_test_003', now() - interval '10 days'),
@@ -176,10 +172,9 @@ values
   (backer3_id, camp1_id, tier1b_id, 75.00,  'completed', 'pi_test_009', now() - interval '2 days'),
   (backer1_id, camp1_id, tier1c_id, 200.00, 'completed', 'pi_test_010', now() - interval '1 day'),
   (backer2_id, camp1_id, null,       50.00, 'completed', 'pi_test_011', now() - interval '12 hours'),
-  -- Campaign 1: pending donations (not completed, not counted in raised_amount)
   (backer3_id, camp1_id, tier1b_id, 75.00,  'pending',   'pi_test_012', now() - interval '1 hour'),
 
-  -- Campaign 2 donations (sum = 3250 — goal met → closed)
+  -- Campaign 2 (raised: 3250, closed)
   (backer1_id, camp2_id, tier2b_id, 150.00, 'completed', 'pi_test_013', now() - interval '20 days'),
   (backer2_id, camp2_id, tier2a_id,  50.00, 'completed', 'pi_test_014', now() - interval '18 days'),
   (backer3_id, camp2_id, tier2b_id, 150.00, 'completed', 'pi_test_015', now() - interval '16 days'),
@@ -197,13 +192,13 @@ values
   (backer3_id, camp2_id, tier2b_id, 150.00, 'completed', 'pi_test_027', now() - interval '10 minutes'),
   (backer1_id, camp2_id, null,      600.00, 'completed', 'pi_test_028', now() - interval '5 minutes'),
 
-  -- Campaign 3 donations (sum = 1760)
+  -- Campaign 3 (raised: 1760)
   (backer1_id, camp3_id, tier3a_id, 50.00,  'completed', 'pi_test_029', now() - interval '9 days'),
   (backer3_id, camp3_id, tier3a_id, 50.00,  'completed', 'pi_test_030', now() - interval '7 days'),
   (backer2_id, camp3_id, null,      100.00, 'completed', 'pi_test_031', now() - interval '5 days'),
   (backer1_id, camp3_id, tier3a_id, 50.00,  'completed', 'pi_test_032', now() - interval '3 days'),
 
-  -- Campaign 4 donations (sum = 5785)
+  -- Campaign 4 (raised: 5785)
   (backer2_id, camp4_id, tier4b_id, 100.00, 'completed', 'pi_test_033', now() - interval '22 days'),
   (backer1_id, camp4_id, tier4a_id,  30.00, 'completed', 'pi_test_034', now() - interval '20 days'),
   (backer3_id, camp4_id, tier4b_id, 100.00, 'completed', 'pi_test_035', now() - interval '18 days'),
@@ -215,7 +210,7 @@ values
 
 end $$;
 
--- ─── Verify results ───────────────────────────────────────────────────────────
+-- ─── Verify ───────────────────────────────────────────────────────────────────
 select
   c.title,
   c.status,
