@@ -8,6 +8,9 @@ const paymentsRouter = require('./routes/payments');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Trust Render's load balancer so express-rate-limit can read real client IPs
+app.set('trust proxy', 1);
+
 // ─── Allowed origins ────────────────────────────────────────────────────────
 const allowedOrigins = [
   'http://localhost:5173',
