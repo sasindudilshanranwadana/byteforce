@@ -4,6 +4,7 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 
 const paymentsRouter = require('./routes/payments');
+const notificationsRouter = require('./routes/notifications');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -65,6 +66,7 @@ app.use(express.json());
 
 // ─── Routes ─────────────────────────────────────────────────────────────────
 app.use('/api/payments', paymentsRouter.router);
+app.use('/api/notifications', notificationsRouter);
 
 // ─── Health check ────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {
