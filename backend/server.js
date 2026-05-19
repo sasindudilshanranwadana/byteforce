@@ -75,6 +75,15 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
+// ─── Root ────────────────────────────────────────────────────────────────────
+app.get('/', (_req, res) => {
+  res.json({
+    name: 'Byteforce Crowdfunding API',
+    status: 'ok',
+    health: '/api/health',
+  });
+});
+
 // ─── 404 handler ─────────────────────────────────────────────────────────────
 app.use((_req, res) => {
   res.status(404).json({ error: 'Route not found' });
