@@ -35,8 +35,9 @@ services:
         value: 30000
 
   # ─── Frontend (React/Vite SPA) ───────────────────────────────────────────────
-  - type: static
+  - type: web
     name: byteforce-frontend
+    env: static
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
