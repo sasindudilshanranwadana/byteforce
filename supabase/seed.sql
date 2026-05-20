@@ -224,4 +224,3 @@ join public.profiles p on p.id = c.creator_id
 left join public.donations d on d.campaign_id = c.id
 group by c.id, p.name
 order by c.created_at;
--- seed: updated to use real auth.users UUIDs

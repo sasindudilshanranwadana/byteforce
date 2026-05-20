@@ -49,6 +49,3 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
-# CI pipeline — Byteforce
-# secrets wired
-# node 20 + npm install

@@ -141,4 +141,3 @@ if (require.main === module) {
 }
 
 module.exports = { processPendingNotifications };
-// mailer.js — Nodemailer fan-out for campaign update notifications

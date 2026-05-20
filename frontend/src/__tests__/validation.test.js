@@ -95,4 +95,3 @@ describe('Reset password schema', () => {
     expect(result.error.issues[0].message).toMatch(/number/i);
   });
 });
-// frontend unit tests — components, pages, and form validation

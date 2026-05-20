@@ -107,5 +107,3 @@ if (require.main === module) {
 }
 
 module.exports = app;
-// trust proxy for Render load balancer
-// root route — returns API info instead of 404

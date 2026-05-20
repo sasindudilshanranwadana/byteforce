@@ -135,4 +135,3 @@ export default function CampaignUpdates({ campaign }) {
     </section>
   );
 }
-// CampaignUpdates — timeline view for campaign posts

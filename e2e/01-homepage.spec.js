@@ -27,4 +27,3 @@ test.describe('Homepage', () => {
     await expect(page).toHaveURL(/\/campaigns\/.+/);
   });
 });
-// e2e tests — 34 browser tests across 7 test suites

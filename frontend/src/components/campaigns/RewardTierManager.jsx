@@ -192,4 +192,3 @@ export default function RewardTierManager({ campaignId }) {
     </div>
   );
 }
-// RewardTierManager — reward tier CRUD for campaign owners

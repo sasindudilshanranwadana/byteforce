@@ -54,4 +54,3 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
-# render config

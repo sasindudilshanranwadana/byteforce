@@ -275,4 +275,3 @@ function DailyChart({ points }) {
     </div>
   );
 }
-// CampaignerAnalyticsPage — 30-day Recharts area chart
