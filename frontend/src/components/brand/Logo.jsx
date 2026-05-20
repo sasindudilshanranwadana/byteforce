@@ -27,10 +27,14 @@ export default function Logo({ size = 'md', withWordmark = true, className, vari
           </linearGradient>
         </defs>
         <rect x="2" y="2" width="44" height="44" rx="11" fill="url(#bf-mark-grad)" />
+        {/* Rocket — launch your idea */}
         <path
-          d="M27.6 9.5 14.8 26.4a1.2 1.2 0 0 0 .96 1.92h6.34l-3.36 9.66a.9.9 0 0 0 1.6.78l13.32-17.2a1.2 1.2 0 0 0-.95-1.93h-6.45l3.05-8.94a.92.92 0 0 0-1.7-.7Z"
-          fill="#FFFFFF"
+          d="M26.5 10.5C26.5 10.5 18 14 15 22c-1 2.8-1 6-1 6l6 6s3.2 0 6-1c8-3 11.5-11.5 11.5-11.5S32.5 8 26.5 10.5Z"
+          fill="white" opacity="0.95"
         />
+        <circle cx="25" cy="23" r="3.5" fill="url(#bf-mark-grad)" />
+        <path d="M14 28l-4 4.5M13.5 34.5l-4 4" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.8"/>
+        <path d="M13 22c-3 1-5 4-5 4l3 3s2-1 3-3" fill="white" opacity="0.8"/>
       </svg>
       {withWordmark && (
         <span className={cn(
