@@ -13,6 +13,7 @@ import Select from '../components/ui/Select';
 import Button from '../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { CATEGORIES } from '../lib/utils';
+import ImageUpload from '../components/ui/ImageUpload';
 import { Plus, Trash2, ChevronRight, ChevronLeft, Rocket } from 'lucide-react';
 import { cn } from '../lib/utils';
 
@@ -203,24 +204,19 @@ export default function CreateCampaignPage() {
                   {...step1.register('goal_amount')}
                 />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <Input
-                  label="Campaign Deadline"
-                  type="date"
-                  min={minDate}
-                  error={step1.formState.errors.deadline?.message}
-                  required
-                  {...step1.register('deadline')}
-                />
-                <Input
-                  label="Cover Image URL"
-                  type="url"
-                  placeholder="https://..."
-                  hint="Optional — paste a direct image URL"
-                  error={step1.formState.errors.image_url?.message}
-                  {...step1.register('image_url')}
-                />
-              </div>
+              <Input
+                label="Campaign Deadline"
+                type="date"
+                min={minDate}
+                error={step1.formState.errors.deadline?.message}
+                required
+                {...step1.register('deadline')}
+              />
+              <ImageUpload
+                value={step1.watch('image_url') || ''}
+                onChange={(url) => step1.setValue('image_url', url, { shouldValidate: true })}
+                error={step1.formState.errors.image_url?.message}
+              />
               <div className="flex justify-end pt-2">
                 <Button type="submit" size="lg">
                   Next: Reward Tiers <ChevronRight size={16} />
