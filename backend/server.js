@@ -5,6 +5,10 @@ const rateLimit = require('express-rate-limit');
 
 const paymentsRouter = require('./routes/payments');
 const notificationsRouter = require('./routes/notifications');
+const campaignsRouter = require('./routes/campaigns');
+const donationsRouter = require('./routes/donations');
+const adminRouter = require('./routes/admin');
+const authRouter = require('./routes/auth');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -65,6 +69,10 @@ app.post(
 app.use(express.json());
 
 // ─── Routes ─────────────────────────────────────────────────────────────────
+app.use('/api/auth', authRouter);
+app.use('/api/campaigns', campaignsRouter);
+app.use('/api/donations', donationsRouter);
+app.use('/api/admin', adminRouter);
 app.use('/api/payments', paymentsRouter.router);
 app.use('/api/notifications', notificationsRouter);
 
