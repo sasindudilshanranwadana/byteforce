@@ -123,9 +123,9 @@ export default function HomePage() {
               transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
               className="lg:col-span-5"
             >
-              <div className="relative">
+              <div className="relative pt-8">
                 {/* Floating top badge */}
-                <div className="absolute -top-5 -left-5 rounded-2xl bg-white px-4 py-3 shadow-pop ring-1 ring-ink-100 flex items-center gap-3 z-10">
+                <div className="absolute top-0 -left-5 rounded-2xl bg-white px-4 py-3 shadow-pop ring-1 ring-ink-100 flex items-center gap-3 z-10">
                   <div className="h-9 w-9 rounded-xl bg-accent-50 flex items-center justify-center">
                     <Heart size={18} className="text-accent-500 fill-accent-500" />
                   </div>
@@ -175,7 +175,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Floating bottom badge */}
-                <div className="absolute -bottom-5 -right-5 rounded-2xl bg-gradient-to-br from-accent-500 to-rose-600 px-4 py-3 shadow-pop text-white flex items-center gap-2 z-10">
+                <div className="absolute -bottom-5 right-0 rounded-2xl bg-gradient-to-br from-accent-500 to-rose-600 px-4 py-3 shadow-pop text-white flex items-center gap-2 z-10">
                   <TrendingUp size={16} />
                   <div className="text-xs font-bold">Trending up 24%</div>
                 </div>
