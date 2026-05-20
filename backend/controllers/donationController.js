@@ -1,13 +1,15 @@
-const { Donation, Campaign, User } = require('../models');
+const getSupabase = require('../config/supabase');
 
 // GET /api/donations/history — backer's donation history (SCRUM-27)
 const getDonationHistory = async (req, res, next) => {
   try {
-    const donations = await Donation.findAll({
-      where: { backerId: req.user.id },
-      include: [{ model: Campaign, as: 'campaign', attributes: ['id', 'title', 'imageUrl', 'status'] }],
-      order: [['createdAt', 'DESC']],
-    });
+    const sb = getSupabase();
+    const { data: donations, error } = await sb
+      .from('donations')
+      .select('*, campaigns(id, title, image_url, status)')
+      .eq('backer_id', req.user.id)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
     res.json(donations);
   } catch (err) { next(err); }
 };
@@ -15,16 +17,20 @@ const getDonationHistory = async (req, res, next) => {
 // GET /api/donations/campaign/:id — donations for a campaign (campaigner analytics)
 const getCampaignDonations = async (req, res, next) => {
   try {
-    const campaign = await Campaign.findByPk(req.params.id);
-    if (!campaign) return res.status(404).json({ message: 'Campaign not found.' });
-    if (campaign.userId !== req.user.id && req.user.role !== 'admin')
+    const sb = getSupabase();
+    const { data: campaign, error: campErr } = await sb
+      .from('campaigns').select('user_id').eq('id', req.params.id).single();
+    if (campErr || !campaign) return res.status(404).json({ message: 'Campaign not found.' });
+    if (campaign.user_id !== req.user.id && req.user.role !== 'admin')
       return res.status(403).json({ message: 'Not authorised.' });
 
-    const donations = await Donation.findAll({
-      where: { campaignId: req.params.id, status: 'completed' },
-      include: [{ model: User, as: 'backer', attributes: ['id', 'name'] }],
-      order: [['createdAt', 'DESC']],
-    });
+    const { data: donations, error } = await sb
+      .from('donations')
+      .select('*, profiles(id, name)')
+      .eq('campaign_id', req.params.id)
+      .eq('status', 'completed')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
     res.json(donations);
   } catch (err) { next(err); }
 };

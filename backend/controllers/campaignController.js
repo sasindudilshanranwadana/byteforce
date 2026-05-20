@@ -1,48 +1,70 @@
-const { Op } = require('sequelize');
-const { Campaign, User, RewardTier, Donation } = require('../models');
+const getSupabase = require('../config/supabase');
 
 // GET /api/campaigns — browse & search (SCRUM-19)
 const getCampaigns = async (req, res, next) => {
   try {
+    const sb = getSupabase();
     const { search, category, page = 1, limit = 12 } = req.query;
-    const where = { status: 'active' };
-    if (search) where[Op.or] = [{ title: { [Op.like]: `%${search}%` } }, { description: { [Op.like]: `%${search}%` } }];
-    if (category) where.category = category;
-
     const offset = (page - 1) * limit;
-    const { rows: campaigns, count } = await Campaign.findAndCountAll({
-      where, limit: parseInt(limit), offset,
-      include: [{ model: User, as: 'creator', attributes: ['id', 'name'] }],
-      order: [['createdAt', 'DESC']],
-    });
+
+    let query = sb
+      .from('campaigns')
+      .select('*, profiles(id, name)', { count: 'exact' })
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .range(offset, offset + parseInt(limit) - 1);
+
+    if (search) query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+    if (category) query = query.eq('category', category);
+
+    const { data: campaigns, error, count } = await query;
+    if (error) throw error;
     res.json({ campaigns, total: count, page: parseInt(page), totalPages: Math.ceil(count / limit) });
+  } catch (err) { next(err); }
+};
+
+// GET /api/campaigns/my — campaigner's own campaigns
+const getMyCampaigns = async (req, res, next) => {
+  try {
+    const sb = getSupabase();
+    const { data: campaigns, error } = await sb
+      .from('campaigns')
+      .select('*, reward_tiers(*)')
+      .eq('user_id', req.user.id)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    res.json(campaigns);
   } catch (err) { next(err); }
 };
 
 // GET /api/campaigns/:id
 const getCampaignById = async (req, res, next) => {
   try {
-    const campaign = await Campaign.findByPk(req.params.id, {
-      include: [
-        { model: User, as: 'creator', attributes: ['id', 'name'] },
-        { model: RewardTier, as: 'rewardTiers', order: [['minimumAmount', 'ASC']] },
-      ],
-    });
-    if (!campaign) return res.status(404).json({ message: 'Campaign not found.' });
-    res.json({ ...campaign.toJSON(), progress: campaign.getProgress() });
+    const sb = getSupabase();
+    const { data: campaign, error } = await sb
+      .from('campaigns')
+      .select('*, profiles(id, name), reward_tiers(*)')
+      .eq('id', req.params.id)
+      .single();
+    if (error || !campaign) return res.status(404).json({ message: 'Campaign not found.' });
+    res.json(campaign);
   } catch (err) { next(err); }
 };
 
 // POST /api/campaigns — create campaign (SCRUM-18)
 const createCampaign = async (req, res, next) => {
   try {
-    const { title, description, goalAmount, deadline, category, imageUrl, rewardTiers } = req.body;
-    const campaign = await Campaign.create({
-      userId: req.user.id, title, description, goalAmount, deadline,
-      category: category || 'General', imageUrl, status: 'pending',
-    });
-    if (rewardTiers && rewardTiers.length > 0) {
-      await RewardTier.bulkCreate(rewardTiers.map(t => ({ ...t, campaignId: campaign.id })));
+    const sb = getSupabase();
+    const { title, description, goal_amount, deadline, category, image_url, reward_tiers } = req.body;
+    const { data: campaign, error } = await sb
+      .from('campaigns')
+      .insert({ user_id: req.user.id, title, description, goal_amount, deadline, category: category || 'General', image_url, status: 'pending' })
+      .select()
+      .single();
+    if (error) throw error;
+
+    if (reward_tiers && reward_tiers.length > 0) {
+      await sb.from('reward_tiers').insert(reward_tiers.map(t => ({ ...t, campaign_id: campaign.id })));
     }
     res.status(201).json(campaign);
   } catch (err) { next(err); }
@@ -51,23 +73,16 @@ const createCampaign = async (req, res, next) => {
 // PUT /api/campaigns/:id — edit campaign
 const updateCampaign = async (req, res, next) => {
   try {
-    const campaign = await Campaign.findByPk(req.params.id);
-    if (!campaign) return res.status(404).json({ message: 'Campaign not found.' });
-    if (campaign.userId !== req.user.id) return res.status(403).json({ message: 'Not authorised.' });
-    await campaign.update(req.body);
-    res.json(campaign);
-  } catch (err) { next(err); }
-};
+    const sb = getSupabase();
+    const { data: existing, error: fetchErr } = await sb
+      .from('campaigns').select('user_id').eq('id', req.params.id).single();
+    if (fetchErr || !existing) return res.status(404).json({ message: 'Campaign not found.' });
+    if (existing.user_id !== req.user.id) return res.status(403).json({ message: 'Not authorised.' });
 
-// GET /api/campaigns/my — campaigner's own campaigns
-const getMyCampaigns = async (req, res, next) => {
-  try {
-    const campaigns = await Campaign.findAll({
-      where: { userId: req.user.id },
-      include: [{ model: RewardTier, as: 'rewardTiers' }],
-      order: [['createdAt', 'DESC']],
-    });
-    res.json(campaigns.map(c => ({ ...c.toJSON(), progress: c.getProgress() })));
+    const { data: campaign, error } = await sb
+      .from('campaigns').update(req.body).eq('id', req.params.id).select().single();
+    if (error) throw error;
+    res.json(campaign);
   } catch (err) { next(err); }
 };
 

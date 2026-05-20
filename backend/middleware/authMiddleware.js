@@ -1,14 +1,32 @@
-const jwt = require('jsonwebtoken');
+const { createClient } = require('@supabase/supabase-js');
 
-const protect = (req, res, next) => {
+const getSupabase = () => {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
+};
+
+const protect = async (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ message: 'Not authorised. No token provided.' });
   }
   const token = authHeader.split(' ')[1];
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    const supabase = getSupabase();
+    if (!supabase) return res.status(500).json({ message: 'Server configuration error.' });
+
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    if (error || !user) return res.status(401).json({ message: 'Not authorised. Invalid token.' });
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id, name, email, role')
+      .eq('id', user.id)
+      .single();
+
+    req.user = profile || { id: user.id, email: user.email, role: 'backer' };
     next();
   } catch (err) {
     return res.status(401).json({ message: 'Not authorised. Invalid token.' });
